@@ -1,0 +1,57 @@
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
+import { fileURLToPath } from "url";
+import dts from "vite-plugin-dts";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export default defineConfig({
+  plugins: [
+    react({
+      jsxRuntime: "automatic",
+    }),
+    dts({
+      insertTypesEntry: true,
+      include: ["src/**/*"],
+      exclude: ["src/**/*.test.*", "src/**/*.spec.*"],
+    }),
+  ],
+  build: {
+    lib: {
+      entry: path.resolve(__dirname, "src/index.ts"),
+      name: "ReactTour",
+      fileName: (format) => `index.${format}.js`,
+      formats: ["es", "umd"],
+    },
+    minify: true,
+    rollupOptions: {
+      external: (id) => {
+        return (
+          id === "react" ||
+          id === "react-dom" ||
+          id === "react/jsx-runtime" ||
+          id === "react/jsx-dev-runtime" ||
+          id.startsWith("react/") ||
+          id.startsWith("react-dom/")
+        );
+      },
+      output: {
+        globals: {
+          react: "React",
+          "react-dom": "ReactDOM",
+          "react/jsx-runtime": "React",
+          "react/jsx-dev-runtime": "React",
+        },
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name && assetInfo.name.endsWith(".css")) {
+            return "style.css";
+          }
+          return assetInfo.name || "asset";
+        },
+      },
+    },
+    cssCodeSplit: false,
+    cssMinify: true,
+  },
+});

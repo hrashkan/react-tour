@@ -1,0 +1,55 @@
+{
+    "name": "react-tour",
+    "version": "0.0.1",
+    "description": "A lightweight, dependency-free React tour library for creating guided tours in your applications",
+    "main": "./dist/index.umd.js",
+    "module": "./dist/index.es.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.es.js",
+            "require": "./dist/index.umd.js",
+            "types": "./dist/index.d.ts"
+        },
+        "./style.css": "./dist/style.css"
+    },
+    "files": [
+        "dist",
+        "README.md"
+    ],
+    "scripts": {
+        "build": "vite build && tsc --emitDeclarationOnly --outDir dist",
+        "dev": "vite build --watch",
+        "type-check": "tsc --noEmit",
+        "prepublishOnly": "npm run build",
+        "demo": "cd demo && npm install && npm run dev",
+        "demo:build": "cd demo && npm install && npm run build",
+        "demo:preview": "cd demo && npm run preview"
+    },
+    "keywords": [
+        "react",
+        "tour",
+        "guide",
+        "onboarding",
+        "walkthrough",
+        "tutorial",
+        "joyride"
+    ],
+    "author": "Ashkan Hooshidar",
+    "license": "MIT",
+    "peerDependencies": {
+        "react": ">=16.8.0",
+        "react-dom": ">=16.8.0"
+    },
+    "devDependencies": {
+        "@types/node": "^24.10.1",
+        "@types/react": "^18.2.45",
+        "@types/react-dom": "^18.2.18",
+        "@vitejs/plugin-react": "^4.2.1",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
+        "typescript": "^5.3.3",
+        "vite": "^5.0.8",
+        "vite-plugin-dts": "^3.6.4"
+    }
+}
