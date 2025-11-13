@@ -5,9 +5,6 @@ const ARROW_SIZE = 8;
 
 export function getElementPosition(element: HTMLElement): Position {
   if (typeof window === "undefined") {
-    console.error(
-      "[React Tour Positioning] Cannot get element position: window object is not available"
-    );
     return { top: 0, left: 0, width: 0, height: 0 };
   }
 
@@ -15,13 +12,6 @@ export function getElementPosition(element: HTMLElement): Position {
     typeof window.scrollY === "undefined" ||
     typeof window.scrollX === "undefined"
   ) {
-    console.error(
-      "[React Tour Positioning] Cannot get element position: window scroll properties are not available",
-      {
-        hasScrollY: typeof window.scrollY !== "undefined",
-        hasScrollX: typeof window.scrollX !== "undefined",
-      }
-    );
     return { top: 0, left: 0, width: 0, height: 0 };
   }
 
@@ -42,9 +32,6 @@ export function calculateTooltipPosition(
   offset: number = 0
 ): TooltipPositionData {
   if (typeof window === "undefined") {
-    console.error(
-      "[React Tour Positioning] Cannot calculate position: window object is not available"
-    );
     return { top: 0, left: 0, placement };
   }
 
@@ -52,13 +39,6 @@ export function calculateTooltipPosition(
     typeof window.innerWidth === "undefined" ||
     typeof window.innerHeight === "undefined"
   ) {
-    console.error(
-      "[React Tour Positioning] Cannot calculate position: window dimensions are not available",
-      {
-        hasInnerWidth: typeof window.innerWidth !== "undefined",
-        hasInnerHeight: typeof window.innerHeight !== "undefined",
-      }
-    );
     return { top: 0, left: 0, placement };
   }
 

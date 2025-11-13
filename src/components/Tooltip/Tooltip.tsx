@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, memo } from "react";
 import {
   TooltipPosition,
   Position,
@@ -35,7 +35,7 @@ interface TooltipProps {
   style?: React.CSSProperties;
 }
 
-export const Tooltip: React.FC<TooltipProps> = ({
+const TooltipComponent: React.FC<TooltipProps> = ({
   targetPosition,
   target,
   title,
@@ -70,9 +70,6 @@ export const Tooltip: React.FC<TooltipProps> = ({
     if (!tooltipRef.current || !targetPosition) return;
 
     if (typeof window === "undefined") {
-      console.error(
-        "[React Tour Tooltip] Cannot calculate position: window object is not available"
-      );
       return;
     }
 
@@ -80,13 +77,6 @@ export const Tooltip: React.FC<TooltipProps> = ({
       typeof window.scrollY === "undefined" ||
       typeof window.scrollX === "undefined"
     ) {
-      console.error(
-        "[React Tour Tooltip] Cannot calculate position: window scroll properties are not available",
-        {
-          hasScrollY: typeof window.scrollY !== "undefined",
-          hasScrollX: typeof window.scrollX !== "undefined",
-        }
-      );
       return;
     }
 
@@ -105,9 +95,6 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
       requestAnimationFrame(() => {
         if (typeof window === "undefined") {
-          console.error(
-            "[React Tour Tooltip] Window not available during position calculation"
-          );
           return;
         }
 
@@ -160,35 +147,11 @@ export const Tooltip: React.FC<TooltipProps> = ({
     };
 
     requestAnimationFrame(updatePosition);
-
-    let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
-    const handleScroll = () => {
-      if (scrollTimeout) {
-        clearTimeout(scrollTimeout);
-      }
-      scrollTimeout = setTimeout(() => {
-        requestAnimationFrame(updatePosition);
-      }, 16);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll, { passive: true });
-
-    return () => {
-      if (scrollTimeout) {
-        clearTimeout(scrollTimeout);
-      }
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
-    };
   }, [targetPosition, target, placement, offset]);
 
   if (!targetPosition) return null;
 
   if (typeof window === "undefined") {
-    console.error(
-      "[React Tour Tooltip] Cannot render: window object is not available"
-    );
     return null;
   }
 
@@ -196,13 +159,6 @@ export const Tooltip: React.FC<TooltipProps> = ({
     typeof window.scrollY === "undefined" ||
     typeof window.scrollX === "undefined"
   ) {
-    console.error(
-      "[React Tour Tooltip] Cannot render: window scroll properties are not available",
-      {
-        hasScrollY: typeof window.scrollY !== "undefined",
-        hasScrollX: typeof window.scrollX !== "undefined",
-      }
-    );
     return null;
   }
 
@@ -318,3 +274,5 @@ export const Tooltip: React.FC<TooltipProps> = ({
     </div>
   );
 };
+
+export const Tooltip = memo(TooltipComponent);

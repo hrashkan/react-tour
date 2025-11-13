@@ -22,7 +22,7 @@ export default defineConfig({
       entry: path.resolve(__dirname, "src/index.ts"),
       name: "ReactTour",
       fileName: (format) => `index.${format}.js`,
-      formats: ["es", "umd"],
+      formats: ["es", "cjs"],
     },
     minify: true,
     rollupOptions: {
@@ -37,12 +37,6 @@ export default defineConfig({
         );
       },
       output: {
-        globals: {
-          react: "React",
-          "react-dom": "ReactDOM",
-          "react/jsx-runtime": "React",
-          "react/jsx-dev-runtime": "React",
-        },
         assetFileNames: (assetInfo) => {
           if (assetInfo.name && assetInfo.name.endsWith(".css")) {
             return "style.css";

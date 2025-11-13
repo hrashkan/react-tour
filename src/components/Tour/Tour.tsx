@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { TourProps, Step, Position } from "../../types";
 import { getTargetElement, scrollToElement } from "../../utils/dom.utils";
 import { getElementPosition } from "../../utils/positioning.utils";
@@ -32,9 +32,6 @@ export function Tour(props: TourProps): JSX.Element | null {
 
   const updateTargetPosition = useCallback((step: Step) => {
     if (typeof window === "undefined") {
-      console.error(
-        "[React Tour] Cannot update target position: window object is not available"
-      );
       setTargetPosition(null);
       return;
     }
@@ -47,10 +44,6 @@ export function Tour(props: TourProps): JSX.Element | null {
         typeof position.top !== "number" ||
         typeof position.left !== "number"
       ) {
-        console.error("[React Tour] Invalid position calculated", {
-          position,
-          element,
-        });
         setTargetPosition(null);
         return;
       }
@@ -67,26 +60,17 @@ export function Tour(props: TourProps): JSX.Element | null {
         }
         return position;
       });
-
-      scrollToElement(element, 100, step.placement);
     } else {
-      console.warn("[React Tour] Target element not found", {
-        target: step.target,
-      });
       setTargetPosition(null);
     }
   }, []);
 
   const startTour = useCallback(() => {
     if (steps.length === 0) {
-      console.warn("[React Tour] Cannot start tour: no steps provided");
       return;
     }
 
     if (typeof window === "undefined") {
-      console.error(
-        "[React Tour] Cannot start tour: window object is not available"
-      );
       return;
     }
 
@@ -94,13 +78,6 @@ export function Tour(props: TourProps): JSX.Element | null {
       typeof window.scrollY === "undefined" ||
       typeof window.scrollX === "undefined"
     ) {
-      console.error(
-        "[React Tour] Cannot start tour: window scroll properties are not available",
-        {
-          hasScrollY: typeof window.scrollY !== "undefined",
-          hasScrollX: typeof window.scrollX !== "undefined",
-        }
-      );
       return;
     }
 
@@ -164,6 +141,7 @@ export function Tour(props: TourProps): JSX.Element | null {
       const element = getTargetElement(currentStep.target);
       if (element) {
         updateTargetPosition(currentStep);
+        scrollToElement(element, 100, currentStep.placement);
       } else if (retryCount < maxRetries) {
         retryCount++;
         retryTimer = setTimeout(findTarget, 100);
@@ -180,48 +158,32 @@ export function Tour(props: TourProps): JSX.Element | null {
     };
   }, [currentStep, updateTargetPosition]);
 
+  const rafIdRef = useRef<number | null>(null);
+  const scheduledRef = useRef(false);
+
   useEffect(() => {
     if (!isRunning || !currentStep) return;
 
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    let lastUpdateTime = 0;
-    const DEBOUNCE_MS = 100;
-    const MIN_UPDATE_INTERVAL = 200;
-
-    const updatePosition = () => {
-      const now = Date.now();
-      if (now - lastUpdateTime < MIN_UPDATE_INTERVAL) {
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
-        timeoutId = setTimeout(() => {
-          lastUpdateTime = Date.now();
-          updateTargetPosition(currentStep);
-        }, DEBOUNCE_MS);
-        return;
-      }
-
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      timeoutId = setTimeout(() => {
-        lastUpdateTime = Date.now();
+    const scheduleUpdate = () => {
+      if (scheduledRef.current) return;
+      scheduledRef.current = true;
+      rafIdRef.current = window.requestAnimationFrame(() => {
+        scheduledRef.current = false;
         updateTargetPosition(currentStep);
-      }, DEBOUNCE_MS);
+      });
     };
 
-    window.addEventListener("resize", updatePosition, { passive: true });
-    window.addEventListener("scroll", updatePosition, {
-      passive: true,
-      capture: true,
-    });
+    window.addEventListener("resize", scheduleUpdate, { passive: true });
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
 
     return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+      if (rafIdRef.current != null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
       }
-      window.removeEventListener("resize", updatePosition);
-      window.removeEventListener("scroll", updatePosition, true);
+      scheduledRef.current = false;
+      window.removeEventListener("resize", scheduleUpdate);
+      window.removeEventListener("scroll", scheduleUpdate);
     };
   }, [isRunning, currentStep, updateTargetPosition]);
 

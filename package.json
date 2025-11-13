@@ -2,23 +2,27 @@
     "name": "react-tour",
     "version": "0.0.1",
     "description": "A lightweight, dependency-free React tour library for creating guided tours in your applications",
-    "main": "./dist/index.umd.js",
+    "main": "./dist/index.cjs.js",
     "module": "./dist/index.es.js",
     "types": "./dist/index.d.ts",
     "exports": {
         ".": {
             "import": "./dist/index.es.js",
-            "require": "./dist/index.umd.js",
+            "require": "./dist/index.cjs.js",
             "types": "./dist/index.d.ts"
         },
         "./style.css": "./dist/style.css"
     },
+    "sideEffects": [
+        "*.css",
+        "**/*.css"
+    ],
     "files": [
         "dist",
         "README.md"
     ],
     "scripts": {
-        "build": "vite build && tsc --emitDeclarationOnly --outDir dist",
+        "build": "vite build",
         "dev": "vite build --watch",
         "type-check": "tsc --noEmit",
         "prepublishOnly": "npm run build",
