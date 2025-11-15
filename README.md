@@ -16,11 +16,14 @@ A lightweight, dependency-free React tour library for creating guided tours in y
 
 ```bash
 npm install react-tour
+
+yarn add react-tour
 ```
 
 ## Quick Start
 
 ```tsx
+import React, { useState } from "react";
 import { Tour } from "react-tour";
 import "react-tour/style.css";
 
@@ -51,6 +54,13 @@ function App() {
     </div>
   );
 }
+```
+
+### CommonJS usage
+
+```js
+const { Tour } = require("react-tour");
+require("react-tour/style.css");
 ```
 
 ## API Reference
@@ -217,10 +227,10 @@ The demo showcases all features of React Tour including:
 
 See the `examples/` directory for more usage examples:
 
-- `basic-usage.tsx` - Basic tour setup
-- `advanced-usage.tsx` - Advanced features with progress and skip
-- `custom-styling.tsx` - Custom styling example
-- `dynamic-targets.tsx` - Using dynamic targets
+- `BasicUsage.tsx` - Basic tour setup
+- `AdvantageUsage.tsx` - Advanced features with progress and skip
+- `CustomStyling.tsx` - Custom styling example
+- `DynamicTarget.tsx` - Using dynamic targets
 
 ## License
 
