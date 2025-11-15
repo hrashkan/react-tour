@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, memo } from "react";
+import React, { useEffect, useRef, useState, memo, useCallback } from "react";
 import {
   TooltipPosition,
   Position,
@@ -66,13 +66,9 @@ const TooltipComponent: React.FC<TooltipProps> = ({
     bottom?: number;
   }>({});
 
-  useEffect(() => {
+  const computeAndSetPositions = useCallback(() => {
     if (!tooltipRef.current || !targetPosition) return;
-
-    if (typeof window === "undefined") {
-      return;
-    }
-
+    if (typeof window === "undefined") return;
     if (
       typeof window.scrollY === "undefined" ||
       typeof window.scrollX === "undefined"
@@ -80,46 +76,35 @@ const TooltipComponent: React.FC<TooltipProps> = ({
       return;
     }
 
-    const updatePosition = () => {
-      const tooltip = tooltipRef.current;
-      if (!tooltip) return;
+    const tooltip = tooltipRef.current;
+    if (!tooltip) return;
 
-      const tooltipRect = tooltip.getBoundingClientRect();
-      const tooltipWidth = tooltipRect.width;
-      const tooltipHeight = tooltipRect.height;
+    const tooltipRect = tooltip.getBoundingClientRect();
+    const tooltipWidth = tooltipRect.width;
+    const tooltipHeight = tooltipRect.height;
 
-      if (tooltipWidth === 0 || tooltipHeight === 0) {
-        requestAnimationFrame(updatePosition);
+    if (tooltipWidth === 0 || tooltipHeight === 0) {
+      requestAnimationFrame(computeAndSetPositions);
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      if (typeof window === "undefined") {
         return;
       }
 
-      requestAnimationFrame(() => {
-        if (typeof window === "undefined") {
-          return;
-        }
+      let viewportTargetPosition: Position;
 
-        let viewportTargetPosition: Position;
-
-        if (target) {
-          const element = getTargetElement(target);
-          if (element) {
-            const rect = element.getBoundingClientRect();
-            viewportTargetPosition = {
-              top: rect.top,
-              left: rect.left,
-              width: rect.width,
-              height: rect.height,
-            };
-          } else {
-            const scrollY = window.scrollY || 0;
-            const scrollX = window.scrollX || 0;
-            viewportTargetPosition = {
-              top: targetPosition.top - scrollY,
-              left: targetPosition.left - scrollX,
-              width: targetPosition.width,
-              height: targetPosition.height,
-            };
-          }
+      if (target) {
+        const element = getTargetElement(target);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          viewportTargetPosition = {
+            top: rect.top,
+            left: rect.left,
+            width: rect.width,
+            height: rect.height,
+          };
         } else {
           const scrollY = window.scrollY || 0;
           const scrollX = window.scrollX || 0;
@@ -130,24 +115,67 @@ const TooltipComponent: React.FC<TooltipProps> = ({
             height: targetPosition.height,
           };
         }
+      } else {
+        const scrollY = window.scrollY || 0;
+        const scrollX = window.scrollX || 0;
+        viewportTargetPosition = {
+          top: targetPosition.top - scrollY,
+          left: targetPosition.left - scrollX,
+          width: targetPosition.width,
+          height: targetPosition.height,
+        };
+      }
 
-        const pos = calculateTooltipPosition(
-          viewportTargetPosition,
-          tooltipWidth,
-          tooltipHeight,
-          placement,
-          offset
-        );
+      const pos = calculateTooltipPosition(
+        viewportTargetPosition,
+        tooltipWidth,
+        tooltipHeight,
+        placement,
+        offset
+      );
 
-        setPosition(pos);
-        setArrowPosition(
-          getArrowPosition(viewportTargetPosition, pos, pos.placement)
-        );
-      });
+      setPosition(pos);
+      setArrowPosition(
+        getArrowPosition(viewportTargetPosition, pos, pos.placement)
+      );
+    });
+  }, [targetPosition, target, placement, offset]);
+
+  useEffect(() => {
+    requestAnimationFrame(computeAndSetPositions);
+  }, [computeAndSetPositions]);
+
+  useEffect(() => {
+    let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
+    const handleScrollOrResize = () => {
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      scrollTimeout = setTimeout(() => {
+        requestAnimationFrame(computeAndSetPositions);
+      }, 16);
     };
 
-    requestAnimationFrame(updatePosition);
-  }, [targetPosition, target, placement, offset]);
+    window.addEventListener("scroll", handleScrollOrResize, {
+      passive: true,
+    });
+    window.addEventListener("resize", handleScrollOrResize, {
+      passive: true,
+    });
+    document.addEventListener("scroll", handleScrollOrResize, {
+      passive: true,
+      capture: true,
+    });
+
+    return () => {
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      window.removeEventListener("scroll", handleScrollOrResize);
+      window.removeEventListener("resize", handleScrollOrResize);
+      document.removeEventListener("scroll", handleScrollOrResize, true);
+    };
+  }, [computeAndSetPositions]);
 
   if (!targetPosition) return null;
 

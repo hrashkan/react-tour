@@ -175,6 +175,10 @@ export function Tour(props: TourProps): JSX.Element | null {
 
     window.addEventListener("resize", scheduleUpdate, { passive: true });
     window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    document.addEventListener("scroll", scheduleUpdate, {
+      passive: true,
+      capture: true,
+    });
 
     return () => {
       if (rafIdRef.current != null) {
@@ -184,6 +188,7 @@ export function Tour(props: TourProps): JSX.Element | null {
       scheduledRef.current = false;
       window.removeEventListener("resize", scheduleUpdate);
       window.removeEventListener("scroll", scheduleUpdate);
+      document.removeEventListener("scroll", scheduleUpdate, true);
     };
   }, [isRunning, currentStep, updateTargetPosition]);
 
