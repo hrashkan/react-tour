@@ -1,10 +1,13 @@
 {
-    "name": "react-tour",
+    "name": "@hrashkan/react-tour",
     "version": "0.0.1",
     "description": "A lightweight, dependency-free React tour library for creating guided tours in your applications",
     "main": "./dist/index.cjs.js",
     "module": "./dist/index.es.js",
     "types": "./dist/index.d.ts",
+    "publishConfig": {
+        "access": "public"
+    },
     "exports": {
         ".": {
             "import": "./dist/index.es.js",

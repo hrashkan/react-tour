@@ -15,17 +15,17 @@ A lightweight, dependency-free React tour library for creating guided tours in y
 ## Installation
 
 ```bash
-npm install react-tour
+npm install @hrashkan/react-tour
 
-yarn add react-tour
+yarn add @hrashkan/react-tour
 ```
 
 ## Quick Start
 
 ```tsx
 import React, { useState } from "react";
-import { Tour } from "react-tour";
-import "react-tour/style.css";
+import { Tour } from "@hrashkan/react-tour";
+import "@hrashkan/react-tour/style.css";
 
 function App() {
   const [runTour, setRunTour] = useState(false);
@@ -59,8 +59,8 @@ function App() {
 ### CommonJS usage
 
 ```js
-const { Tour } = require("react-tour");
-require("react-tour/style.css");
+const { Tour } = require("@hrashkan/react-tour");
+require("@hrashkan/react-tour/style.css");
 ```
 
 ## API Reference
